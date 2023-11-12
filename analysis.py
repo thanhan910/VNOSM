@@ -74,7 +74,7 @@ def create_geojson_object(element):
     if len(lines) == 1:
         geojson_object["geometry"] = {"type": "Polygon", "coordinates": lines}
     else:
-        geojson_object["geometry"] = {"type": "MultiPolygon", "coordinates": lines}
+        geojson_object["geometry"] = {"type": "MultiPolygon", "coordinates": [[l] for l in lines]}
 
     return geojson_object
 
@@ -87,7 +87,7 @@ def get_each_geojson():
         if os.path.isfile(os.path.join(INPUT_DIR, f)) and f.endswith(".json")
     }
     data = {k: create_geojson_object(v) for k, v in data.items()}
-    OUTPUT_DIR = "subareas"
+    OUTPUT_DIR = "geojson"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     for k, v in data.items():
         v["properties"]["parent"] = []
@@ -131,9 +131,10 @@ def get_subareas():
         if len(polygons) > 0:
             with open(os.path.join(OUTPUT_DIR, f"{k}.geojson"), "w") as f:
                 json.dump({"type": "FeatureCollection", "features": polygons}, f)
-        # print(k)
+        print(k)
 
 
 
 if __name__ == "__main__":
+    get_each_geojson()
     get_subareas()
