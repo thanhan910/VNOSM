@@ -83,7 +83,7 @@ def main():
     INPUT_DIR = "output"
     data = {int(f.removesuffix('.json')): json.load(open(os.path.join(INPUT_DIR, f), "r")) for f in os.listdir(INPUT_DIR) if os.path.isfile(os.path.join(INPUT_DIR, f)) and f.endswith(".json")}
     data = { k : create_geojson_object(v) for k, v in data.items() }
-    OUTPUT_DIR = "geojson"
+    OUTPUT_DIR = "subareas"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     for k, v in data.items():
         v['properties']['parent'] = []
@@ -94,8 +94,15 @@ def main():
             else:
                 print(f"Warning: Cannot find {osm_id}")
     for k, v in data.items():
-        with open(os.path.join(OUTPUT_DIR, f"{k}.geojson"), "w") as f:
-            json.dump(v, f)
+        polygons = []
+        for osm_id in v['properties']['subareas']:
+            if osm_id in data:
+                polygons.append(data[osm_id])
+            else:
+                print(f"Warning [{k}]: Cannot find {osm_id}")
+        if len(polygons) > 0:    
+            with open(os.path.join(OUTPUT_DIR, f"{k}.geojson"), "w") as f:
+                json.dump(polygons, f)
         print(k)
 
 if __name__ == "__main__":
